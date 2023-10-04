@@ -7,19 +7,21 @@ using namespace std;
 const int MAX_EMPLOYEES = 100;
 const int MAX_CARS = 100;
 const int MAX_DEALS = 100;
-const int MAX_CUSTOMERS = 100;
 
+// Структура для хранения информации о человеке (имя и фамилия)
 struct Person {
     string first_name;
     string last_name;
 };
 
+// Структура для хранения информации о сотруднике (персональные данные и должность)
 struct Employee {
     Person person;
     string position;
     int salary;
 };
 
+// Структура для хранения информации об автомобиле
 struct Car {
     string brand_model;
     string country;
@@ -29,16 +31,19 @@ struct Car {
     int quantity;
 };
 
+// Структура для хранения информации о покупателе (персональные данные и номер телефона)
 struct Customer {
     Person person;
     string phone_number;
 };
 
+// Структура для хранения информации об автосалоне
 struct Dealership {
     string name;
     string address;
 };
 
+// Структура для хранения информации о сделке
 struct Deal {
     int deal_number;
     string date;
@@ -46,10 +51,10 @@ struct Deal {
     Customer buyer;
     Car car_sold;
     int transaction_amount;
-    Dealership dealership; // Информация об автосалоне
+    Dealership dealership;
 };
 
-// Установка кодировки для консоли
+// Функция для установки кодировки для консоли (для поддержки кириллицы)
 void SetConsoleEncoding() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
@@ -64,7 +69,7 @@ void InputEmployeeInfo(Employee& employee) {
     cin >> employee.person.last_name;
 
     cout << "Введите должность сотрудника: ";
-    cin.ignore();
+    cin.ignore();  // Игнорируем символ новой строки, оставшийся в буфере
     getline(cin, employee.position);
 
     cout << "Введите зарплату сотрудника: ";
@@ -95,7 +100,7 @@ void InputCarInfo(Car& car) {
 }
 
 // Функция для ввода информации о сделке
-void InputDealInfo(Employee* employees, int numEmployees, Car* cars, int numCars, Deal& deal) {
+void InputDealInfo(Employee* employees, int numEmployees, Car* cars, int& numCars, Deal& deal) {
     cout << "Введите номер сделки: ";
     cin >> deal.deal_number;
 
@@ -149,11 +154,25 @@ void InputDealInfo(Employee* employees, int numEmployees, Car* cars, int numCars
 
     cout << "Введите сумму сделки: ";
     cin >> deal.transaction_amount;
+
+    for (int i = 0; i < numCars; i++) {
+        if (cars[i].brand_model == deal.car_sold.brand_model) {
+            cars[i].quantity--;
+            if (cars[i].quantity == 0) {
+                for (int j = i; j < numCars - 1; j++) {
+                    cars[j] = cars[j + 1];
+                }
+                numCars--;
+            }
+            break;
+        }
+    }
 }
 
 // Функция для ввода информации об автосалоне
 void InputDealershipInfo(Dealership& dealership) {
     cout << "Введите название автосалона: ";
+    cin.ignore();
     getline(cin, dealership.name);
 
     cout << "Введите адрес автосалона: ";
@@ -197,73 +216,90 @@ void PrintCarInfo(const Car& car) {
 int main() {
     SetConsoleEncoding();
 
+    // Вывод заголовка программы
     cout << "          -- Реализация АТД на языке С и С++ --" << endl;
 
-    Dealership dealership; // Информация об автосалоне
+    // Ввод информации о автосалоне
+    Dealership dealership;
     cout << endl;
-    InputDealershipInfo(dealership); // Ввод информации об автосалоне
+    InputDealershipInfo(dealership);
 
-    Employee employees[MAX_EMPLOYEES];
-    Car cars[MAX_CARS];
-    int numEmployees;
-    int numCars;
-
+    // Ввод информации о сотрудниках
+    Employee employees[MAX_EMPLOYEES]; // Объявление массива employees
+    int employeeCount;
+    cout << endl;
+    cout << "  -- Ввод данных о сотрудниках --" << endl;
     cout << "Введите количество сотрудников: ";
-    cin >> numEmployees;
-    for (int i = 0; i < numEmployees; i++) {
-        cout << endl;
+    cin >> employeeCount;
+    for (int i = 0; i < employeeCount; i++) {
         cout << "Сотрудник #" << (i + 1) << ":" << endl;
         InputEmployeeInfo(employees[i]);
+        cout << endl;
     }
 
+    // Ввод информации о автомобилях
+    Car cars[MAX_CARS]; // Объявление массива cars
+    int carCount;
+
     cout << endl;
+    cout << "  -- Ввод данных об автомобилях --" << endl;
     cout << "Введите количество автомобилей: ";
-    cin >> numCars;
-    for (int i = 0; i < numCars; i++) {
-        cout << endl;
+    cin >> carCount;
+    for (int i = 0; i < carCount; i++) {
         cout << "Автомобиль #" << (i + 1) << ":" << endl;
         InputCarInfo(cars[i]);
+        cout << endl;
     }
 
-    // Вывод информации об автосалоне
     cout << endl;
-    cout << " -- Информация об автосалоне --" << endl;
+    cout << endl;
+    cout << " __--Вся введенная информация--__" << endl;
+    cout << endl;
+
+    // Вывод информации о автосалоне
+    cout << endl << "-- Информация об автосалоне --" << endl;
     PrintDealershipInfo(dealership);
 
     // Вывод информации о сотрудниках
-    cout << endl;
-    cout << " -- Информация о сотрудниках --" << endl;
-    for (int i = 0; i < numEmployees; i++) {
-        cout << " -- Сотрудник #" << (i + 1) << ":" << endl;
+    cout << endl << "-- Информация о сотрудниках --" << endl;
+    for (int i = 0; i < employeeCount; i++) {
+        cout << endl;
+        cout << "Сотрудник #" << (i + 1) << ":" << endl;
         PrintEmployeeInfo(employees[i]);
     }
 
-    // Вывод информации об автомобилях
-    cout << endl;
-    cout << " -- Информация об автомобилях --" << endl;
-    for (int i = 0; i < numCars; i++) {
-        cout << " -- Автомобиль #" << (i + 1) << ":" << endl;
+    // Вывод информации о автомобилях
+    cout << endl << "-- Информация об автомобилях --" << endl;
+    for (int i = 0; i < carCount; i++) {
+        cout << endl;
+        cout << "Автомобиль #" << (i + 1) << ":" << endl;
         PrintCarInfo(cars[i]);
     }
 
-    // Ввод информации о сделках и вывод информации о них
-    int numDeals;
+    // Ввод информации о сделках
+    Deal deals[MAX_DEALS]; // Объявление массива deals
+    int dealCount;
     cout << endl;
     cout << "Введите количество сделок: ";
-    cin >> numDeals;
-    Deal deals[MAX_DEALS];
-
-    for (int i = 0; i < numDeals; i++) {
-        cout << endl;
-        cout << "Сделка #" << (i + 1) << ":" << endl;
-        InputDealInfo(employees, numEmployees, cars, numCars, deals[i]);
-    }
+    cin >> dealCount;
 
     cout << endl;
-    cout << " -- Информация о сделках --" << endl;
-    for (int i = 0; i < numDeals; i++) {
+    cout << "  -- Ввод данных о сделках --" << endl;
+    for (int i = 0; i < dealCount; i++) {
+        InputDealInfo(employees, employeeCount, cars, carCount, deals[i]);
+        PrintDealInfo(deals[i]);
+        cout << endl;
+    }
+
+    // Вывод информации о каждой сделке
+    cout << endl;
+    cout << " __-- Информация о сделках --__" << endl;
+
+    for (int i = 0; i < dealCount; ++i) {
+        cout << endl;
         PrintDealInfo(deals[i]);
     }
 
     return 0;
 }
+
